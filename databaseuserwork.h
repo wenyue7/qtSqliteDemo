@@ -1,6 +1,7 @@
 #ifndef DATABASEUSERWORK_H
 #define DATABASEUSERWORK_H
 
+#include <QThread>
 #include <QDate>
 #include <QTime>
 #include <QTimer>
@@ -18,8 +19,11 @@ public:
 
 private:
     DataBaseEncap *mDBEnc;
+    QString curDate;
     QString todayInfoTable;
     QString todaySummaryTable;
+
+    QThread workeThd;
 
     QTimer *mTimer;
 

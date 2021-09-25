@@ -40,6 +40,9 @@ DataBaseUserWork::DataBaseUserWork(QObject *parent) :
     mTimer = new QTimer(this);
     connect( mTimer, SIGNAL(timeout()), this, SLOT(timerSolt()) );
     mTimer->start(2000);  //以毫秒为单位
+
+    this->moveToThread(&workeThd);
+    workeThd.start();
 }
 
 void DataBaseUserWork::timerSolt()
