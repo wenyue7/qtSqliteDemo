@@ -15,7 +15,7 @@
 #include<QDateTime>
 #include<QDate>
 
-#define DATABASE_LOG_SW 1
+#define DATABASE_LOG_SW 0
 #define DATABASE_LOG(str1, str2) \
 do{ \
     if(DATABASE_LOG_SW){ \

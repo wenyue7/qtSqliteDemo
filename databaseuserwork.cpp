@@ -4,9 +4,31 @@ DataBaseUserWork::DataBaseUserWork(QObject *parent) :
     QObject(parent)
 {
     mDBEnc = new DataBaseEncap("workDBCon", "test.db");
-    todayInfoTable = QString("lhj").append(QDate::currentDate().toString(Qt::ISODate).remove('-').append("info"));
-    todaySummaryTable = QString("lhj").append(QDate::currentDate().toString(Qt::ISODate).remove('-').append("summary"));
 
+    mTimer = new QTimer(this);
+    connect( mTimer, SIGNAL(timeout()), this, SLOT(timerSolt()) );
+    mTimer->start(2000);  //以毫秒为单位
+
+    this->moveToThread(&workeThd);
+    workeThd.start();
+}
+
+void DataBaseUserWork::initTodayTable()
+{
+    if(QTime::currentTime().hour() >= TODAY_BEGIN_TIME){
+        curDealTblDate = QDate::currentDate().toString(Qt::ISODate);
+        toDropTblDate = QDate::currentDate().addDays(-1 * TABLRE_MAX_COUNT).toString(Qt::ISODate);
+    }else{
+        curDealTblDate = QDate::currentDate().addDays(-1).toString(Qt::ISODate);
+        toDropTblDate = QDate::currentDate().addDays(-1).addDays(-1 * TABLRE_MAX_COUNT).toString(Qt::ISODate);
+    }
+
+    todayInfoTable = QString("lhj").append(curDealTblDate.remove('-')).append("info");
+    todaySummaryTable = QString("lhj").append(curDealTblDate.remove('-')).append("summary");
+    toDropInfoTable = QString("lhj").append(toDropTblDate.remove('-')).append("info");
+    toDropSummaryTable = QString("lhj").append(toDropTblDate.remove('-')).append("summary");
+
+    //-- create
     if(mDBEnc->isTableExit(todayInfoTable)){
         DATABASE_WORK_LOG(QString("table %1 is exits !!!").arg(todayInfoTable));
     }else{
@@ -37,12 +59,16 @@ DataBaseUserWork::DataBaseUserWork(QObject *parent) :
         mDBEnc->createTable(todaySummaryTable, create_sql);
     }
 
-    mTimer = new QTimer(this);
-    connect( mTimer, SIGNAL(timeout()), this, SLOT(timerSolt()) );
-    mTimer->start(2000);  //以毫秒为单位
+    //-- drop
+    if(mDBEnc->isTableExit(toDropInfoTable)){
+        DATABASE_WORK_LOG(QString("table %1 is exits !!!").arg(todaySummaryTable));
+        mDBEnc->dropTable(toDropInfoTable);
+    }
+    if(mDBEnc->isTableExit(toDropSummaryTable)){
+        DATABASE_WORK_LOG(QString("table %1 is exits !!!").arg(todaySummaryTable));
+        mDBEnc->dropTable(toDropSummaryTable);
+    }
 
-    this->moveToThread(&workeThd);
-    workeThd.start();
 }
 
 void DataBaseUserWork::timerSolt()
@@ -56,6 +82,9 @@ void DataBaseUserWork::timerSolt()
     double val1 = 2.11;
     double val2 = 2.22;
     QString others = "balabala";
+
+    //======== table deal ========
+    initTodayTable();
 
     //======== todayInfoTable ========
     infoTbl[0].val = &id;
@@ -78,19 +107,14 @@ void DataBaseUserWork::timerSolt()
     int msgCnt = 0;
     mDBEnc->queryDate(todayInfoTable, query_info_sql, queryTmp);
     while(queryTmp.next()){
-        qDebug() << queryTmp.value(0).toString()
-                 << " " << queryTmp.value(1).toString()
-                 << " " << queryTmp.value(2).toString()
-                 << " " << queryTmp.value(3).toString()
-                 << " " << queryTmp.value(4).toString()
-                 << " " << queryTmp.value(5).toString()
+#if 0
+        qDebug() << queryTmp.value(0).toString() << " " << queryTmp.value(1).toString() << " " << queryTmp.value(2).toString()
+                 << " " << queryTmp.value(3).toString() << " " << queryTmp.value(4).toString() << " " << queryTmp.value(5).toString()
                  << " " << queryTmp.value(6).toString();
+#endif
         msgCnt++;
     }
 
-
-
-    qDebug() << "=================================: " << msgCnt;
     //======== todaySummaryTable ========
     if(msgCnt == 1){
         //-- insert

@@ -20,7 +20,7 @@ DataBaseWidget::DataBaseWidget(QWidget *parent) :
 
 
 //    mDB.setHostName("localhost");
-    mDB.setDatabaseName(FILEPATH+"/test.db");  //如果本目录下没有该文件,则会在本目录下生成,否则连接该文件
+    mDB.setDatabaseName(FILEPATH+"test.db");  //如果本目录下没有该文件,则会在本目录下生成,否则连接该文件
 //    mDB.setUserName("mdatabase");
 //    mDB.setPassword("mdatabase");
     if(mDB.open()){
@@ -60,11 +60,14 @@ DataBaseWidget::~DataBaseWidget()
 
 void DataBaseWidget::refreshDisplay()
 {
+    if(mDB.tables().size() < 2)
+        return;
+
     QString query_sql = QString("select * from %1").arg(mDB.tables().at(0));
     mSqlQueryMod->setQuery(query_sql, mDB);
     view->setModel(mSqlQueryMod);
 
-    query_sql = QString("select * from %1 where id=0").arg(mDB.tables().at(0));
+    query_sql = QString("select * from %1 where id<5").arg(mDB.tables().at(0));
     mSqlQueryModFail->setQuery(query_sql, mDB);
     viewFail->setModel(mSqlQueryModFail);
 
