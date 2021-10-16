@@ -65,15 +65,13 @@ void DataBaseWidget::refreshDisplay()
 
     QString query_sql = QString("select * from %1").arg(mDB.tables().at(0));
     mSqlQueryMod->setQuery(query_sql, mDB);
-    view->setModel(mSqlQueryMod);
+    mSqlQueryMod->setHeaderData(0, Qt::Horizontal, "alter name");
 
     query_sql = QString("select * from %1 where id<5").arg(mDB.tables().at(0));
     mSqlQueryModFail->setQuery(query_sql, mDB);
-    viewFail->setModel(mSqlQueryModFail);
 
     query_sql = QString("select * from %1").arg(mDB.tables().at(1));
     mSqlQueryModSum->setQuery(query_sql, mDB);
-    viewSum->setModel(mSqlQueryModSum);
 
     return;
 }
